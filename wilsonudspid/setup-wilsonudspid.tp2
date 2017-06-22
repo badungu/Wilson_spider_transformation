@@ -4,6 +4,8 @@ AUTHOR ~badungu~
 VERSION ~0.1b~
 
 BEGIN ~Wilson spider transformation in underdark~
+REQUIRE_PREDICATE GAME_IS ~bg2ee eet~ ~This mod is for BG2EE/EET only~
+REQUIRE_PREDICATE !(MOD_IS_INSTALLED ~cdtweaks/setup-cdtweaks.tp2~ ~3170~) ~This mod is not compatible with "No Drow Avatars On Party In Underdark" component from Tweaks-Anthology~
 
 ADD_SPELL ~%MOD_FOLDER%/wilspid.SPL~ 3 1 WILSON_SPIDER_CHANGE
 SAY NAME1 ~Wilson Spider Transformation~
@@ -50,7 +52,7 @@ BUT_ONLY
 
 
 //Neh'taniel compatibility (not compatible yet with EE, just in case)
-ACTION_IF FILE_EXISTS_IN_GAME ~SK#Drow.spl~ BEGIN
+ACTION_IF MOD_IS_INSTALLED ~Setup-Neh'taniel.tp2~ ~0~ BEGIN
 	COPY_EXISTING ~AR2102.bcs~ ~override~
 	DECOMPILE_AND_PATCH BEGIN
 		REPLACE_TEXTUALLY ~Global("changed","AR2102",0)[%LNL%%MNL%%TAB% ]*InParty("WILSON")~ ~Global("changed","AR2102",0) InParty("WILSON") !InParty("SK#Neht")~
