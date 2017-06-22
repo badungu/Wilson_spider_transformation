@@ -1,0 +1,84 @@
+BACKUP ~wilsonudspid/backup~
+AUTHOR ~badungu~
+
+VERSION ~0.1b~
+
+BEGIN ~Wilson spider transformation in underdark~
+
+ADD_SPELL ~%MOD_FOLDER%/wilspid.SPL~ 3 1 WILSON_SPIDER_CHANGE
+SAY NAME1 ~Wilson Spider Transformation~
+
+COPY_EXISTING ~AR2102.bcs~ ~override~
+DECOMPILE_AND_PATCH BEGIN
+	REPLACE_TEXTUALLY ~Global("changed","AR2102",0)~ ~Global("changed","AR2102",0) !InParty("WILSON")~
+END
+BUT_ONLY
+
+<<<<<<<< .../wilsonudspid-inlined/eAR2102.baf
+IF
+	Global("PlayerLooksLikeDrow","GLOBAL",1)
+	Global("changed","AR2102",0)
+	InParty("WILSON")
+THEN
+	RESPONSE #100
+		ActionOverride(Player1,ApplySpell(Myself,DROW_CHANGE))
+		ActionOverride(Player2,ApplySpell(Myself,DROW_CHANGE))
+		ActionOverride(Player3,ApplySpell(Myself,DROW_CHANGE))
+		ActionOverride(Player4,ApplySpell(Myself,DROW_CHANGE))
+		ActionOverride(Player5,ApplySpell(Myself,DROW_CHANGE))
+		ActionOverride(Player6,ApplySpell(Myself,DROW_CHANGE))
+		ActionOverride("WILSON",ApplySpell(Myself,WILSON_SPIDER_CHANGE))
+		Wait(2)
+		SetGlobal("changed","AR2102",1)
+		ActionOverride("udsilver",StartDialogNoSet(Player1))
+END
+
+>>>>>>>>
+
+EXTEND_TOP ~AR2102.bcs~ ~.../wilsonudspid-inlined/eAR2102.baf~
+
+
+INCLUDE ~%MOD_FOLDER%/macro.tpa~
+
+COPY_EXISTING ~wilson9.cre~ ~override~
+			  ~wilson13.cre~ ~override~
+LPF DELETE_SPECIFIC_CRE_V2_EFFECT_BY_RESOURCE
+		INT_VAR opcode_to_delete = 206
+		STR_VAR resource_to_delete = ~SPIN830~
+END
+BUT_ONLY
+
+
+//Neh'taniel compatibility (not compatible yet with EE, just in case)
+ACTION_IF FILE_EXISTS_IN_GAME ~SK#Drow.spl~ BEGIN
+	COPY_EXISTING ~AR2102.bcs~ ~override~
+	DECOMPILE_AND_PATCH BEGIN
+		REPLACE_TEXTUALLY ~Global("changed","AR2102",0)[%LNL%%MNL%%TAB% ]*InParty("WILSON")~ ~Global("changed","AR2102",0) InParty("WILSON") !InParty("SK#Neht")~
+	END
+	BUT_ONLY
+
+	<<<<<<<< .../wilsonudspid-inlined/eAR2102neth.baf
+	IF
+		InParty("SK#Neht")
+		Global("PlayerLooksLikeDrow","GLOBAL",1)
+		Global("changed","AR2102",0)
+		InParty("WILSON")
+	THEN
+		RESPONSE #100
+			ActionOverride(Player1,ApplySpell(Myself,DROW_CHANGE))
+			ActionOverride(Player2,ApplySpell(Myself,DROW_CHANGE))
+			ActionOverride(Player3,ApplySpell(Myself,DROW_CHANGE))
+			ActionOverride(Player4,ApplySpell(Myself,DROW_CHANGE))
+			ActionOverride(Player5,ApplySpell(Myself,DROW_CHANGE))
+			ActionOverride(Player6,ApplySpell(Myself,DROW_CHANGE))
+			ActionOverride("WILSON",ApplySpell(Myself,WILSON_SPIDER_CHANGE))
+			Wait(1)
+			ActionOverride("SK#Neht",ApplySpellRES("SK#Drow",Myself))
+			Wait(2)
+			SetGlobal("changed","AR2102",1)
+			ActionOverride("udsilver",StartDialogueNoSet(Player1))
+	END
+	>>>>>>>>
+
+	EXTEND_TOP ~AR2102.bcs~ ~.../wilsonudspid-inlined/eAR2102neth.baf~
+END

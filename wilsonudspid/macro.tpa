@@ -1,0 +1,42 @@
+// inspired by code built into weidu, thanks to all contributors. :)
+// https://github.com/WeiDUorg/weidu/blob/0ec2a76116d42a5712d3d13c46ac911353dfc5ce/src/tph/include/g_macros.tpa
+
+DEFINE_PATCH_FUNCTION ~DELETE_SPECIFIC_CRE_V2_EFFECT_BY_RESOURCE~
+  INT_VAR opcode_to_delete = 0
+  STR_VAR resource_to_delete = ~~
+BEGIN
+  LAUNCH_PATCH_MACRO ~DELETE_SPECIFIC_CRE_V2_EFFECT_BY_RESOURCE~
+END
+
+DEFINE_PATCH_MACRO ~DELETE_SPECIFIC_CRE_V2_EFFECT_BY_RESOURCE~ BEGIN
+  LAUNCH_PATCH_FUNCTION ~FJ_CRE_VALIDITY~ RET valid = valid END
+  PATCH_IF (valid) BEGIN
+
+    READ_BYTE 0x33  ___#fx_flag
+    READ_LONG 0x2c4 ___#fx_off
+    READ_LONG 0x2c8 ___#fx_num
+    SET ___#delta = 0
+    FOR (___#index1 = 0; ___#index1 < ___#fx_num; ___#index1 = ___#index1 + 1) BEGIN
+      PATCH_IF ___#fx_flag = 1 BEGIN
+        READ_LONG (___#fx_off + ___#index1 * 0x108 + 8) ___#opcode
+		READ_ASCII (___#fx_off + ___#index1 * 0x108 + 0x28 ) ___#resource
+      END
+      PATCH_IF ( (___#opcode = opcode_to_delete) AND (~%___#resource%~ STRING_EQUAL_CASE ~%resource_to_delete%~ ) ) BEGIN
+        DELETE_BYTES (___#fx_off + ___#index1 * (___#fx_flag = 1 ? 0x108 : 0x30)) ___#fx_flag = 1 ? 0x108 : 0x30
+        SET ___#delta = ___#delta + 1
+        SET ___#fx_num = ___#fx_num - 1
+        SET ___#index1 = ___#index1 - 1
+      END
+    END
+    PATCH_IF (___#delta > 0) BEGIN
+      WRITE_LONG 0x2c8 ___#fx_num
+      PATCH_FOR_EACH ___#offset IN 0x2a0 0x2a8 0x2b0 0x2b8 0x2bc BEGIN
+        READ_LONG ___#offset ___#current_off
+        PATCH_IF ___#current_off > ___#fx_off BEGIN
+          WRITE_LONG ___#offset (___#current_off - ___#delta * (___#fx_flag = 1 ? 0x108 : 0x30))
+        END
+      END
+    END
+
+  END
+END
